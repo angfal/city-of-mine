@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head/>
+<h:body>
+    <h:form>
+
+        <!-- Menu -->
+        <p:menubar>
+            <p:menuitem value="#{msg['template.menu.mainPage']}" url="/xhtml/home.jsf"/>
+            <p:submenu label="#{msg['template.menu.map']}" rendered="#{sessionBean.user != null}">
+                <p:menuitem value="#{msg['template.menu.map.myPlaces']}" url="/xhtml/map/myPlaces.jsf"/>
+                <p:menuitem value="#{msg['template.menu.map.globalPlaces']}" url="/xhtml/map/globalPlaces.jsf" rendered="#{request.isUserInRole('ROLE_ADMIN')}"/>
+                <p:menuitem value="#{msg['template.menu.map.myRoutes']}" url="/xhtml/map/myRoutes.jsf"/>
+            </p:submenu>
+            <p:submenu label="#{msg['template.menu.moderation']}" rendered="#{request.isUserInRole('ROLE_ADMIN')}">
+                <p:menuitem value="#{msg['template.menu.moderation.places']}" url="/xhtml/moderation/places.jsf"/>
+            </p:submenu>
+            <p:submenu label="#{msg['template.menu.system']}" rendered="#{request.isUserInRole('ROLE_ADMIN')}">
+                <p:menuitem value="#{msg['template.menu.dumpDb']}" action="#{systemBean.downloadDatabaseDump}" ajax="false"/>
+            </p:submenu>
+
+            <f:facet name="options">
+
+                <!-- ... search -->
+                <p:inputText id="search" widgetVar="search" style="margin-right:10px" value="#{sessionBean.searchPattern}"
+                             valueChangeListener="#{sessionBean.search}"/>
+                <p:watermark for="search" value="#{msg['template.menu.search']}"/>
+
+                <!-- ... login/registration -->
+                <p:commandButton type="button" rendered="#{sessionBean.user == null}"
+                                 value="#{msg['template.menu.login']}"
+                                 icon="ui-icon-extlink"
+                                 onclick="PF('loginDlg').show();"/>
+                <p:commandButton type="button" rendered="#{sessionBean.user == null}"
+                                 value="#{msg['template.menu.registration']}"
+                                 onclick="PF('regDlg').show();"/>
+
+                <!-- ... user menu -->
+                <p:menuButton value="#{sessionBean.user.login}" rendered="#{sessionBean.user != null}">
+                    <p:menuitem value="#{msg['template.menu.logout']}" url="/logout"/>
+                </p:menuButton>
+
+                <h:panelGroup rendered="#{sessionBean.providerId != null}">
+                    <h:graphicImage title="#{msg['template.menu.'.concat(sessionBean.providerId)]}" value="/resources/images/social/#{sessionBean.providerId}.png" styleClass="social-indicator"/>
+                </h:panelGroup>
+            </f:facet>
+        </p:menubar>
+
+    </h:form>
+</h:body>
+</html>

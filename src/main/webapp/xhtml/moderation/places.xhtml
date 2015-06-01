@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="content">
+        <script type="text/javascript">
+            function handleNodeClick(event) {
+                if (event.which == 1) {
+                    setTimeout('showHideNode()', 0);
+                }
+            }
+        </script>
+
+        <p:layout>
+            <p:layoutUnit position="west" size="320" header="#{msg['moderation.place.tree.header']}" resizable="true">
+                <h:form id="treeForm">
+
+                    <!-- Place context menu -->
+                    <p:contextMenu for="placesTree" nodeType="LOCAL_PLACE">
+                        <p:menuitem value="#{msg['moderation.place.tree.menu.goTo']}" icon="ui-icon-arrowthickstop-1-e"
+                                    update=":mapForm:map"
+                                    actionListener="#{moderationPlacesBean.goToPlace}"/>
+                        <p:menuitem value="#{msg['moderation.place.tree.menu.view']}" icon="ui-icon-search"
+                                    update=":p_form"
+                                    actionListener="#{moderationPlacesBean.viewPlace}"
+                                    oncomplete="PF('placeDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- Place moderation tree -->
+                    <p:tree id="placesTree" value="#{moderationPlacesBean.rootNode}" var="data"
+                            selection="#{moderationPlacesBean.selectedNode}" selectionMode="single" onNodeClick="handleNodeClick(event);">
+                        <p:ajax event="expand"/>
+                        <p:ajax event="collapse"/>
+
+                        <p:treeNode icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                        <p:treeNode type="LOCAL_PLACE" icon="ui-icon-place-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                    </p:tree>
+                    <p:remoteCommand name="showHideNode" update=":treeForm:placesTree :mapForm:map"
+                                     actionListener="#{moderationPlacesBean.showHideNode}" />
+                </h:form>
+            </p:layoutUnit>
+            <p:layoutUnit position="center">
+
+                <!-- My places map -->
+                <h:form id="mapForm" styleClass="all-content">
+                    <p:gmap id="map" styleClass="all-content" center="#{moderationPlacesBean.mapCenter}" zoom="#{moderationPlacesBean.mapZoom}" type="#{moderationPlacesBean.mapType}"
+                            mapTypeControl="false" model="#{moderationPlacesBean.mapModel}" streetView="true">
+
+                        <p:ajax event="overlaySelect" listener="#{moderationPlacesBean.selectMarker}"/>
+                        <p:ajax event="stateChange" listener="#{moderationPlacesBean.refreshMapData}"/>
+
+                        <p:gmapInfoWindow>
+                            <p:outputPanel style="display: block; margin: auto;">
+                                <p:outputPanel id="marks" style="text-align: center; font-weight: bold;">
+                                    <h:outputText value="#{moderationPlacesBean.selectedMarker.data.name}"/>
+                                </p:outputPanel>
+
+                                <p:outputPanel rendered="#{not empty moderationPlacesBean.selectedMarker.data.description}">
+                                    <hr/>
+                                    <h:outputText value="#{moderationPlacesBean.selectedMarker.data.description}" escape="false"/>
+                                </p:outputPanel>
+                            </p:outputPanel>
+                        </p:gmapInfoWindow>
+                    </p:gmap>
+                </h:form>
+            </p:layoutUnit>
+        </p:layout>
+
+        <p:dialog header="#{msg['placeDialog.title']}" widgetVar="placeDlg" resizable="false" closable="false" width="850" height="500">
+            <h:form id="p_form">
+                <p:growl id="p_messages"/>
+
+                <p:tabView binding="#{placeBean.tabView}">
+                    <p:tab title="#{msg['placeDialog.tab.mainData']}">
+                        <h:panelGrid columns="2">
+                            <p:outputLabel for="p_name" value="#{msg['placeDialog.name']}"/>
+                            <p:inputText id="p_name" required="true" size="40" value="#{placeBean.place.name}"
+                                         disabled="true"/>
+
+                            <p:outputLabel for="p_description" value="#{msg['placeDialog.description']}"/>
+                            <p:editor id="p_description" value="#{placeBean.place.description}"
+                                      disabled="true"/>
+
+                            <p:outputLabel for="p_coords" value="#{msg['placeDialog.coordinates']}"/>
+                            <p:outputPanel>
+                                <h:inputHidden id="p_coords" value="#{placeBean.coordinate}"/>
+                                <p:inputText id="p_coords_view" readonly="true" size="40" value="#{placeBean.coordinate}"
+                                             disabled="true"/>
+                            </p:outputPanel>
+                        </h:panelGrid>
+                        <h:panelGrid columns="2" rendered="#{request.isUserInRole('ROLE_LEGAL_PERSON')}">
+                            <p:selectBooleanCheckbox id="p_globalAccess" value="#{placeBean.place.globalAccess}"
+                                                     disabled="true}"/>
+                            <p:outputLabel for="p_globalAccess" value="#{msg['placeDialog.globalAccess']}"/>
+                        </h:panelGrid>
+                    </p:tab>
+
+                    <p:tab title="#{msg['placeDialog.tab.photos']}">
+                        <h:panelGroup id="photos">
+                            <p:galleria value="#{placeBean.pictures}"  var="picture" autoPlay="false"
+                                        rendered="#{not empty placeBean.pictures}" panelWidth="500" panelHeight="313">
+                                <p:graphicImage value="#{picture.content}">
+                                    <f:param name="imageId" value="#{picture.id}"/>
+                                </p:graphicImage>
+                            </p:galleria>
+                        </h:panelGroup>
+                    </p:tab>
+
+                    <p:tab title="#{msg['placeDialog.tab.moderating']}">
+                        <h:panelGrid columns="2">
+                            <p:selectBooleanCheckbox id="p_moderated" value="#{placeBean.place.moderated}"
+                                                     disabled="true"/>
+                            <p:outputLabel for="p_moderated" value="#{msg['placeDialog.moderated']}"/>
+                        </h:panelGrid>
+
+                        <h:panelGrid columns="2">
+                            <p:outputLabel for="p_moderatorComments" value="#{msg['placeDialog.moderatorComments']}"/>
+                            <p:editor id="p_moderatorComments" value="#{placeBean.place.moderatorComments}"/>
+
+                            <p:outputLabel for="p_startModerationDate" value="#{msg['placeDialog.startModerationDate']}"/>
+                            <p:calendar id="p_startModerationDate" value="#{placeBean.place.startModerationDate}"
+                                        pattern="MM/dd/yyyy HH:mm:ss" disabled="true"/>
+
+                            <p:outputLabel for="p_endModerationDate" value="#{msg['placeDialog.endModerationDate']}"/>
+                            <p:calendar id="p_endModerationDate" value="#{placeBean.place.endModerationDate}"
+                                        pattern="MM/dd/yyyy HH:mm:ss" disabled="true"/>
+                        </h:panelGrid>
+                    </p:tab>
+                </p:tabView>
+
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.accept']}" icon="ui-icon-arrowthick-1-n" update=":p_form:p_messages :treeForm:placesTree :mapForm:map"
+                                 actionListener="#{moderationPlacesBean.acceptPlace}"
+                                 oncomplete="handleDialogRequest('placeDlg', args);"
+                                 rendered="#{placeBean.place.moderated == null}"/>
+                <p:commandButton value="#{msg['button.deny']}" icon="ui-icon-arrowthick-1-s" update=":p_form:p_messages :treeForm:placesTree :mapForm:map"
+                                 actionListener="#{moderationPlacesBean.denyPlace}"
+                                 oncomplete="handleDialogRequest('placeDlg', args);"
+                                 rendered="#{placeBean.place.moderated == null}"/>
+                <p:commandButton value="#{msg['button.close']}" icon="ui-icon-close" update="@form" immediate="true"
+                                 onclick="PF('placeDlg').hide();">
+                    <p:resetInput target="p_form"/>
+                </p:commandButton>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

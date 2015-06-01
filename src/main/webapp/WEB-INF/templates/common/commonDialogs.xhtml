@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+		PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core">
+<h:head/>
+<h:body>
+
+<script type="text/javascript">
+	function handleDialogRequest(dlg, args) {
+		if (!args.validationFailed) {
+            PF(dlg).hide();
+		}
+	}
+</script>
+
+<!-- Login Dialog -->
+<p:dialog header="#{msg['loginDialog.header']}" widgetVar="loginDlg" resizable="false" modal="true" closable="false">
+	<h:form id="l_form" prependId="false">
+		<p:growl id="l_messages"/>
+
+		<h:panelGrid columns="2">
+			<p:outputLabel for="j_username" value="#{msg['loginDialog.login']}"/>
+			<p:inputText id="j_username" required="true" value="#{loginBean.login}"/>
+
+			<p:outputLabel for="j_password" value="#{msg['loginDialog.password']}"/>
+			<p:password id="j_password" required="true" value="#{loginBean.password}"/>
+		</h:panelGrid>
+
+        <h:panelGroup styleClass="social-icon-container">
+            <p:commandLink styleClass="social-icon" action="#{sessionBean.socialLogin}" immediate="true">
+                <f:setPropertyActionListener target="#{sessionBean.providerId}" value="vkontakte" />
+                <h:graphicImage title="#{msg['loginDialog.vkontakteLogin']}" value="/resources/images/social/vkontakte.png"/>
+            </p:commandLink>
+            <p:commandLink styleClass="social-icon" action="#{sessionBean.socialLogin}" immediate="true">
+                <f:setPropertyActionListener target="#{sessionBean.providerId}" value="facebook" />
+                <h:graphicImage title="#{msg['loginDialog.facebookLogin']}" value="/resources/images/social/facebook.png"/>
+            </p:commandLink>
+            <p:commandLink styleClass="social-icon" action="#{sessionBean.socialLogin}" immediate="true">
+                <f:setPropertyActionListener target="#{sessionBean.providerId}" value="googleplus" />
+                <h:graphicImage title="#{msg['loginDialog.googlePlusLogin']}" value="/resources/images/social/googleplus.png"/>
+            </p:commandLink>
+            <p:commandLink styleClass="social-icon" action="#{sessionBean.socialLogin}" immediate="true">
+                <f:setPropertyActionListener target="#{sessionBean.providerId}" value="linkedin" />
+                <h:graphicImage title="#{msg['loginDialog.linkedInLogin']}" value="/resources/images/social/linkedin.png"/>
+            </p:commandLink>
+            <p:commandLink styleClass="social-icon" action="#{sessionBean.socialLogin}" immediate="true">
+                <f:setPropertyActionListener target="#{sessionBean.providerId}" value="twitter" />
+                <h:graphicImage title="#{msg['loginDialog.twitterLogin']}" value="/resources/images/social/twitter.png"/>
+            </p:commandLink>
+        </h:panelGroup>
+
+		<p:separator/>
+
+		<p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update="l_messages"
+						 oncomplete="handleDialogRequest('loginDlg', args);"
+						 action="#{loginBean.login}"/>
+		<p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form" immediate="true"
+						 onclick="PF('loginDlg').hide();">
+			<p:resetInput target="l_form"/>
+		</p:commandButton>
+	</h:form>
+</p:dialog>
+
+<!-- Registration Dialog -->
+<p:dialog header="#{msg['regDialog.header']}" widgetVar="regDlg" resizable="false" modal="true" closable="false">
+	<h:form id="r_form">
+		<p:growl id="r_messages"/>
+
+		<h:panelGrid columns="2">
+			<p:outputLabel for="r_login" value="#{msg['regDialog.login']}"/>
+			<p:inputText id="r_login" required="true" value="#{regBean.login}">
+				<f:validator validatorId="edu.city.user.uniqueLogin"/>
+			</p:inputText>
+
+			<p:outputLabel for="r_email" value="#{msg['regDialog.email']}"/>
+			<p:inputText id="r_email" required="true" value="#{regBean.email}">
+				<f:validator validatorId="edu.city.user.emailFormat"/>
+				<f:validator validatorId="edu.city.user.uniqueEmail"/>
+			</p:inputText>
+
+			<p:outputLabel for="r_password" value="#{msg['regDialog.password']}"/>
+			<p:password id="r_password" match="r_confirm" feedback="true" required="true" value="#{regBean.password}"/>
+
+			<p:outputLabel for="r_confirm" value="#{msg['regDialog.confirm']}"/>
+			<p:password id="r_confirm" required="true" value="#{regBean.confirm}"/>
+
+            <p:outputLabel for="r_userType" value="#{msg['regDialog.userType']}"/>
+            <p:selectOneRadio id="r_userType" required="true" value="#{regBean.userType}" layout="grid" columns="1">
+                <f:selectItem itemValue="ROLE_NATURAL_PERSON" itemLabel="#{msg['regDialog.item.naturalPerson']}"/>
+                <f:selectItem itemValue="ROLE_LEGAL_PERSON" itemLabel="#{msg['regDialog.item.legalPerson']}"/>
+            </p:selectOneRadio>
+		</h:panelGrid>
+
+		<p:separator/>
+
+		<p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update="r_messages"
+						 oncomplete="handleDialogRequest('regDlg', args);"
+						 actionListener="#{regBean.registerUser}"/>
+		<p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form" immediate="true"
+						 onclick="PF('regDlg').hide();">
+			<p:resetInput target="r_form"/>
+		</p:commandButton>
+	</h:form>
+</p:dialog>
+
+</h:body>
+</html>

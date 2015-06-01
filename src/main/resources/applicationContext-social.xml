@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <util:properties id="socialAuthProperties">
+
+        <!-- Facebook -->
+        <prop key="graph.facebook.com.consumer_key">1558599071086458</prop>
+        <prop key="graph.facebook.com.consumer_secret">001d425ed1892b0df30d7e903e0b39ab</prop>
+        <prop key="graph.facebook.com.custom_permissions">publish_stream, email</prop>
+
+        <!-- Twitter -->
+        <prop key="twitter.com.consumer_key">T7mpbaxslHH029tyxxXh6A8J2</prop>
+        <prop key="twitter.com.consumer_secret">EyUWvEP3xEUA1icS8QZtv0I7pYNfR6jZQj0UVFl8Mrvr49ErLt</prop>
+
+        <!-- Linked In -->
+        <prop key="api.linkedin.com.consumer_key">75lstu4st7czki</prop>
+        <prop key="api.linkedin.com.consumer_secret">RHoHLugBDveis5WP</prop>
+        <prop key="api.linkedin.com.custom_permissions">r_basicprofile</prop>
+
+        <!-- Google Plus -->
+        <prop key="googleapis.com.consumer_key">52481239758-na1dnot913gq59ih83n81vq0v5bf4g9r.apps.googleusercontent.com</prop>
+        <prop key="googleapis.com.consumer_secret">WUCOx1KEtbro6-dTDJVnjUZu</prop>
+        <prop key="googleapis.com.custom_permissions">profile email</prop>
+
+        <!-- VKontakte -->
+        <prop key="socialauth.vkontakte">edu.course.city.social.provider.VKontakteImpl</prop>
+        <prop key="vkontakte.consumer_key">4833471</prop>
+        <prop key="vkontakte.consumer_secret">jBHB6kMzjY46sE643Pid</prop>
+        <prop key="vkontakte.custom_permissions">email</prop>
+        <prop key="vkontakte.authentication_url">https://oauth.vk.com/authorize</prop>
+        <prop key="vkontakte.access_token_url">https://oauth.vk.com/access_token</prop>
+    </util:properties>
+</beans>

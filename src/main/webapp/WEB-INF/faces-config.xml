@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+			  version="2.0">
+	<application>
+		<locale-config>
+			<default-locale>ru</default-locale>
+		</locale-config>
+		<message-bundle>Messages</message-bundle>
+		<resource-bundle>
+			<base-name>Messages</base-name>
+			<var>msg</var>
+		</resource-bundle>
+        <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+        <resource-handler>edu.course.city.web.handler.PrimeResourceHandler</resource-handler>
+	</application>
+
+    <!--
+	<lifecycle>
+		<phase-listener>edu.course.city.web.listener.DebugPhaseListener</phase-listener>
+	</lifecycle>
+	-->
+</faces-config>

@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="content">
+        <script type="text/javascript">
+            function handleNodeClick(event) {
+                if (event.which == 1) {
+                    setTimeout('showHideNode()', 0);
+                }
+            }
+        </script>
+
+        <p:layout>
+            <p:layoutUnit position="west" size="320" header="#{msg['myPlaces.tree.header']}" resizable="true" collapsible="true">
+                <h:form id="treeForm">
+
+                    <!-- Root group context menu -->
+                    <p:contextMenu for="placesTree" nodeType="ROOT">
+                        <p:submenu label="#{msg['myPlaces.tree.menu.add']}" icon="ui-icon-plusthick">
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.group']}" icon="ui-icon-group-showed"
+                                        update=":g_form"
+                                        actionListener="#{myPlacesBean.createGroup}"
+                                        oncomplete="PF('grpDlg').show();"/>
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.place']}" icon="ui-icon-place-showed"
+                                        update=":p_form"
+                                        actionListener="#{myPlacesBean.createPlace}"
+                                        oncomplete="PF('placeDlg').show();"/>
+                        </p:submenu>
+                    </p:contextMenu>
+
+                    <!-- Global group context menu -->
+                    <p:contextMenu for="placesTree" nodeType="GLOBAL_GROUP">
+                        <p:submenu label="#{msg['myPlaces.tree.menu.add']}" icon="ui-icon-plusthick" rendered="#{myPlacesBean.viewMode == 1}">
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.group']}" icon="ui-icon-group-showed"
+                                        update=":g_form"
+                                        actionListener="#{myPlacesBean.createGroup}"
+                                        oncomplete="PF('grpDlg').show();"/>
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.place']}" icon="ui-icon-place-showed"
+                                        update=":p_form"
+                                        actionListener="#{myPlacesBean.createPlace}"
+                                        oncomplete="PF('placeDlg').show();"/>
+                        </p:submenu>
+                        <p:menuitem value="#{msg['tree.node.empty']}" rendered="#{myPlacesBean.viewMode != 1}"/>
+                    </p:contextMenu>
+
+                    <!-- Local group context menu -->
+                    <p:contextMenu for="placesTree" nodeType="LOCAL_GROUP">
+                        <p:submenu label="#{msg['myPlaces.tree.menu.add']}" icon="ui-icon-plusthick">
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.group']}" icon="ui-icon-group-showed"
+                                        update=":g_form"
+                                        actionListener="#{myPlacesBean.createGroup}"
+                                        oncomplete="PF('grpDlg').show();"/>
+                            <p:menuitem value="#{msg['myPlaces.tree.menu.add.place']}" icon="ui-icon-place-showed"
+                                        update=":p_form"
+                                        actionListener="#{myPlacesBean.createPlace}"
+                                        oncomplete="PF('placeDlg').show();"/>
+                        </p:submenu>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.modify']}" icon="ui-icon-pencil"
+                                    update=":g_form"
+                                    actionListener="#{myPlacesBean.modifyGroup}"
+                                    oncomplete="PF('grpDlg').show();"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.delete']}" icon="ui-icon-closethick"
+                                    update=":cd_dialog"
+                                    actionListener="#{myPlacesBean.deleteGroup}"
+                                    oncomplete="PF('confirmDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- Global Place context menu -->
+                    <p:contextMenu for="placesTree" nodeType="GLOBAL_PLACE">
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.goTo']}" icon="ui-icon-arrowthickstop-1-e"
+                                    update=":mapForm:map"
+                                    actionListener="#{myPlacesBean.goToPlace()}"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.view']}" icon="ui-icon-search"
+                                    update=":p_form"
+                                    actionListener="#{myPlacesBean.viewPlace(0)}"
+                                    oncomplete="PF('placeDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- Local Place context menu -->
+                    <p:contextMenu for="placesTree" nodeType="LOCAL_PLACE">
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.goTo']}" icon="ui-icon-arrowthickstop-1-e"
+                                    update=":mapForm:map"
+                                    actionListener="#{myPlacesBean.goToPlace()}"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.view']}" icon="ui-icon-search"
+                                     update=":p_form"
+                                     actionListener="#{myPlacesBean.viewPlace(0)}"
+                                     oncomplete="PF('placeDlg').show();"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.modify']}" icon="ui-icon-pencil"
+                                    update=":p_form"
+                                    actionListener="#{myPlacesBean.modifyPlace}"
+                                    oncomplete="PF('placeDlg').show();"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.delete']}" icon="ui-icon-closethick"
+                                    update=":cd_dialog"
+                                    actionListener="#{myPlacesBean.deletePlace}"
+                                    oncomplete="PF('confirmDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- Favorite context menu -->
+                    <p:contextMenu for="placesTree" nodeType="FAVORITE">
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.goTo']}" icon="ui-icon-arrowthickstop-1-e"
+                                    update=":mapForm:map"
+                                    actionListener="#{myPlacesBean.goToPlace()}"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.view']}" icon="ui-icon-search"
+                                    update=":p_form"
+                                    actionListener="#{myPlacesBean.viewPlace(0)}"
+                                    oncomplete="PF('placeDlg').show();"/>
+                        <p:menuitem value="#{msg['myPlaces.tree.menu.delete']}" icon="ui-icon-closethick"
+                                    update=":cd_dialog"
+                                    actionListener="#{myPlacesBean.deleteFavoriteByNode}"
+                                    oncomplete="PF('confirmDlg').show();"/>
+                    </p:contextMenu>
+
+                    <p:selectOneMenu value="#{myPlacesBean.viewMode}" rendered="${!request.isUserInRole('ROLE_LEGAL_PERSON')}">
+                        <f:selectItem itemValue="1" itemLabel="#{msg['myPlaces.viewMode.myPlaces']}"/>
+                        <f:selectItem itemValue="3" itemLabel="#{msg['myPlaces.viewMode.favoritePlaces']}"/>
+                        <p:ajax listener="#{myPlacesBean.initPage}" process=":treeForm" update=":treeForm :mapForm"/>
+                    </p:selectOneMenu>
+                    <p:selectOneMenu value="#{myPlacesBean.viewMode}" rendered="${request.isUserInRole('ROLE_LEGAL_PERSON')}">
+                        <f:selectItem itemValue="1" itemLabel="#{msg['myPlaces.viewMode.myPlaces']}"/>
+                        <f:selectItem itemValue="2" itemLabel="#{msg['myPlaces.viewMode.myGlobalPlaces']}"/>
+                        <f:selectItem itemValue="3" itemLabel="#{msg['myPlaces.viewMode.favoritePlaces']}"/>
+                        <p:ajax listener="#{myPlacesBean.initPage}" process=":treeForm" update=":treeForm :mapForm"/>
+                    </p:selectOneMenu>
+
+                    <!-- My places tree -->
+                    <p:tree id="placesTree" value="#{myPlacesBean.rootNode}" var="data"
+                            selection="#{myPlacesBean.selectedNode}" selectionMode="single" onNodeClick="handleNodeClick(event);">
+                        <p:ajax event="expand"/>
+                        <p:ajax event="collapse"/>
+
+                        <p:treeNode>
+                            <h:outputText value="#{data}"/>
+                        </p:treeNode>
+                        <p:treeNode type="ROOT" icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{msg['tree.node.rootGroup']}"/>
+                        </p:treeNode>
+                        <p:treeNode type="GLOBAL_GROUP" icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="[#{data.name}]"/>
+                        </p:treeNode>
+                        <p:treeNode type="LOCAL_GROUP" icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                        <p:treeNode type="GLOBAL_PLACE" icon="ui-icon-place-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                        <p:treeNode type="LOCAL_PLACE" icon="ui-icon-place-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                        <p:treeNode type="FAVORITE" icon="ui-icon-favorite-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                    </p:tree>
+                    <p:remoteCommand name="showHideNode" update=":treeForm:placesTree :mapForm:map"
+                                     actionListener="#{myPlacesBean.showHideNode}" />
+                </h:form>
+            </p:layoutUnit>
+            <p:layoutUnit position="center">
+
+                <!-- My places map -->
+                <h:form id="mapForm" styleClass="all-content">
+                    <p:gmap id="map" styleClass="all-content" center="#{myPlacesBean.mapCenter}" zoom="#{myPlacesBean.mapZoom}" type="#{myPlacesBean.mapType}"
+                            mapTypeControl="false" model="#{myPlacesBean.mapModel}" streetView="true">
+
+                        <p:ajax event="overlaySelect" listener="#{myPlacesBean.selectMarker}"/>
+                        <p:ajax event="stateChange" listener="#{myPlacesBean.refreshMapData}"/>
+                        <p:ajax event="pointSelect" listener="#{myPlacesBean.selectMapPoint}"
+                                disabled="#{!myPlacesBean.selectCoordinateMode}" immediate="true"
+                                process="map :#{p:component('p_coords')} :#{p:component('p_coords_view')}"
+                                update="map :#{p:component('p_coords')} :#{p:component('p_coords_view')}" oncomplete="PF('placeDlg').show();"/>
+
+                        <p:gmapInfoWindow>
+                            <p:outputPanel style="display: block; margin: auto;">
+                                <p:outputPanel id="i_title" style="text-align: center; font-weight: bold;">
+                                    <p:commandLink disabled="#{sessionBean.user == null or !myPlacesBean.canLike}"
+                                                   actionListener="#{myPlacesBean.like}" update="i_title"
+                                                   rendered="#{myPlacesBean.viewMode != 1}">
+                                        <h:graphicImage value="/resources/images/map/thumbs_up.png"/>
+                                        <h:outputText value="#{myPlacesBean.likesCount}"/>
+                                    </p:commandLink>
+
+                                    <p:commandLink disabled="#{sessionBean.user == null or !myPlacesBean.canDislike}" style="padding: 0 15px 0 3px;"
+                                                   actionListener="#{myPlacesBean.dislike}" update="i_title"
+                                                   rendered="#{myPlacesBean.viewMode != 1}">
+                                        <h:graphicImage value="/resources/images/map/thumbs_down.png"/>
+                                        <h:outputText value="#{myPlacesBean.dislikesCount}"/>
+                                    </p:commandLink>
+
+                                    <h:outputText value="#{myPlacesBean.selectedMarker.data.name}"/>
+                                </p:outputPanel>
+
+                                <p:outputPanel rendered="#{not empty myPlacesBean.selectedMarker.data.description}">
+                                    <hr/>
+                                    <h:outputText value="#{myPlacesBean.selectedMarker.data.description}" escape="false"/>
+                                </p:outputPanel>
+
+                                <h:panelGrid style="width: 100%; text-align: right;" rendered="#{myPlacesBean.viewMode != 1}">
+                                    <hr style="margin-bottom: 0;"/>
+                                    <h:panelGroup>
+                                        <h:panelGroup style="float: left; margin-top: 3px;" layout="block">
+                                            <p:commandLink style="margin-right: 5px;" ajax="true"
+                                                           update=":p_form" oncomplete="PF('placeDlg').show();"
+                                                           actionListener="#{myPlacesBean.viewPlace(0)}">
+                                                <h:graphicImage title="#{msg['myPlaces.map.view']}" value="/resources/images/tree/view.png"/>
+                                            </p:commandLink>
+                                            <p:commandLink ajax="true" update=":p_form" oncomplete="PF('placeDlg').show();"
+                                                           actionListener="#{myPlacesBean.viewPlace(1)}">
+                                                <h:graphicImage title="#{msg['myPlaces.map.comments']}" value="/resources/images/map/comments.png"/>
+                                            </p:commandLink>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup id="i_favorite" style="float: right;" layout="block" rendered="#{sessionBean.user != null}">
+                                            <p:commandLink actionListener="#{myPlacesBean.makeUnfavorite}" update="i_favorite"
+                                                           rendered="#{myPlacesBean.favoritePlace and myPlacesBean.viewMode != 3}">
+                                                <h:graphicImage title="#{msg['myPlaces.map.favorite']}" value="/resources/images/map/favorite.png"/>
+                                            </p:commandLink>
+                                            <p:commandLink actionListener="#{myPlacesBean.deleteFavoriteByMap}" update=":cd_dialog"
+                                                           rendered="#{myPlacesBean.favoritePlace and myPlacesBean.viewMode == 3}"
+                                                           oncomplete="PF('confirmDlg').show();">
+                                                <h:graphicImage title="#{msg['myPlaces.map.favorite']}" value="/resources/images/map/favorite.png"/>
+                                            </p:commandLink>
+                                            <p:commandLink actionListener="#{myPlacesBean.makeFavorite}" update="i_favorite"
+                                                           rendered="#{!myPlacesBean.favoritePlace}">
+                                                <h:graphicImage title="#{msg['myPlaces.map.unfavorite']}" value="/resources/images/map/unfavorite.png"/>
+                                            </p:commandLink>
+                                        </h:panelGroup>
+                                    </h:panelGroup>
+                                </h:panelGrid>
+                            </p:outputPanel>
+                        </p:gmapInfoWindow>
+                    </p:gmap>
+                </h:form>
+            </p:layoutUnit>
+        </p:layout>
+
+        <!-- Group dialogs <<< -->
+        <p:dialog header="#{msg['groupDialog.title']}" widgetVar="grpDlg" resizable="true" closable="false">
+            <h:form id="g_form">
+                <p:growl id="g_messages"/>
+
+                <h:panelGrid columns="2">
+                    <p:outputLabel for="g_name" value="#{msg['groupDialog.name']}"/>
+                    <p:inputText id="g_name" required="true" value="#{groupBean.group.name}"/>
+
+                    <p:outputLabel value="#{msg['groupDialog.icon']}"/>
+                    <h:panelGroup>
+                        <p:graphicImage id="g_icon" styleClass="ui-icon-property" cache="false"
+                                        value="#{groupBean.uiGroup.markerIcon != null ? groupBean.uiGroup.markerIcon.content : '/resources/images/map/place.png'}">
+                            <f:param name="imageId" value="#{groupBean.uiGroup.markerIcon != null ? groupBean.uiGroup.markerIcon.id : null}"/>
+                        </p:graphicImage>
+                        <p:commandButton icon="ui-icon-arrowreturnthick-1-n" onclick="PF('g_uploadDlg').show();"/>
+                        <p:commandButton icon="ui-icon-cancel" actionListener="#{groupBean.clearIcon}" update="g_icon"/>
+                    </h:panelGroup>
+                </h:panelGrid>
+
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update="g_messages :treeForm:placesTree :mapForm:map"
+                                 actionListener="#{groupBean.saveGroup}"
+                                 oncomplete="handleDialogRequest('grpDlg', args);"/>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form" immediate="true"
+                                 actionListener="#{groupBean.cancel}"
+                                 onclick="PF('grpDlg').hide();">
+                    <p:resetInput target="g_form"/>
+                </p:commandButton>
+            </h:form>
+        </p:dialog>
+        <p:dialog header="#{msg['uploadDialog.title']}" widgetVar="g_uploadDlg" resizable="false" closable="true" width="750" height="300">
+            <h:form>
+                <p:fileUpload fileUploadListener="#{groupBean.uploadIcon}" mode="advanced"
+                              fileLimit="1" sizeLimit="10000000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" label="#{msg['button.select']}"
+                              uploadLabel="#{msg['button.upload']}" cancelLabel="#{msg['button.cancel']}" update="@this :g_form:g_icon"
+                              invalidFileMessage="#{msg['primefaces.fileUpload.INVALID_TYPE']}"
+                              invalidSizeMessage="#{msg['primefaces.fileUpload.INVALID_FILE_SIZE']}"
+                              fileLimitMessage="#{msg['primefaces.fileUpload.INVALID_FILE_NUMBER']}"
+                              oncomplete="PF('g_uploadDlg').hide();"/>
+            </h:form>
+        </p:dialog>
+        <!-- >>> -->
+
+        <!-- Places dialogs <<< -->
+        <p:dialog header="#{msg['placeDialog.title']}" widgetVar="placeDlg" resizable="false" closable="false" width="850" height="500">
+            <h:form id="p_form">
+                <p:growl id="p_messages"/>
+
+                <p:tabView binding="#{placeBean.tabView}">
+                    <p:tab title="#{msg['placeDialog.tab.mainData']}">
+                        <h:panelGrid columns="2">
+                            <p:outputLabel for="p_name" value="#{msg['placeDialog.name']}"/>
+                            <p:inputText id="p_name" required="true" size="40" value="#{placeBean.place.name}"
+                                         disabled="#{placeBean.viewMode}"/>
+
+                            <p:outputLabel for="p_description" value="#{msg['placeDialog.description']}"/>
+                            <p:editor id="p_description" value="#{placeBean.place.description}"
+                                      disabled="#{placeBean.viewMode}"/>
+
+                            <p:outputLabel for="p_coords" value="#{msg['placeDialog.coordinates']}"/>
+                            <p:outputPanel>
+                                <h:inputHidden id="p_coords" value="#{placeBean.coordinate}" required="true"
+                                               requiredMessage="#{msg['placeDialog.message.requiredCoordinates']}"/>
+                                <p:inputText id="p_coords_view" readonly="true" size="40" value="#{placeBean.coordinate}"
+                                             disabled="#{placeBean.viewMode}"/>
+                                <p:commandButton value="..." actionListener="#{placeBean.selectCoordinate}" immediate="true"
+                                                 onclick="PF('placeDlg').hide();" update=":p_form:p_messages :mapForm:map"
+                                                 rendered="#{!placeBean.viewMode}"/>
+                            </p:outputPanel>
+                        </h:panelGrid>
+                        <h:panelGrid columns="2" rendered="#{request.isUserInRole('ROLE_LEGAL_PERSON')}">
+                            <p:selectBooleanCheckbox id="p_globalAccess" value="#{placeBean.place.globalAccess}"
+                                                     disabled="#{placeBean.viewMode}"/>
+                            <p:outputLabel for="p_globalAccess" value="#{msg['placeDialog.globalAccess']}"/>
+                        </h:panelGrid>
+                    </p:tab>
+
+                    <p:tab title="#{msg['placeDialog.tab.photos']}">
+                        <h:panelGroup id="photos">
+                            <p:galleria value="#{placeBean.pictures}"  var="picture" autoPlay="false"
+                                        rendered="#{not empty placeBean.pictures}" panelWidth="500" panelHeight="313">
+                                <p:graphicImage value="#{picture.content}">
+                                    <f:param name="imageId" value="#{picture.id}"/>
+                                </p:graphicImage>
+                            </p:galleria>
+
+                            <p:commandButton icon="ui-icon-plusthick" value="#{msg['button.upload']}" onclick="PF('p_uploadDlg').show();"
+                                             rendered="#{!placeBean.viewMode}"/>
+                        </h:panelGroup>
+                    </p:tab>
+
+                    <p:tab title="#{msg['placeDialog.tab.moderating']}" rendered="#{placeBean.place.globalAccess and !placeBean.place.globalCopy}">
+                        <h:panelGrid columns="2">
+                            <p:selectBooleanCheckbox id="p_moderated" value="#{placeBean.place.moderated}"
+                                                     disabled="true"/>
+                            <p:outputLabel for="p_moderated" value="#{msg['placeDialog.moderated']}"/>
+                        </h:panelGrid>
+
+                        <h:panelGrid columns="2">
+                            <p:outputLabel for="p_moderatorComments" value="#{msg['placeDialog.moderatorComments']}"/>
+                            <p:editor id="p_moderatorComments" value="#{placeBean.place.moderatorComments}"
+                                      disabled="true"/>
+
+                            <p:outputLabel for="p_startModerationDate" value="#{msg['placeDialog.startModerationDate']}"/>
+                            <p:calendar id="p_startModerationDate" value="#{placeBean.place.startModerationDate}"
+                                        pattern="MM/dd/yyyy HH:mm:ss" disabled="true"/>
+
+                            <p:outputLabel for="p_endModerationDate" value="#{msg['placeDialog.endModerationDate']}"/>
+                            <p:calendar id="p_endModerationDate" value="#{placeBean.place.endModerationDate}"
+                                        pattern="MM/dd/yyyy HH:mm:ss" disabled="true"/>
+                        </h:panelGrid>
+                    </p:tab>
+
+                    <p:tab title="#{msg['placeDialog.tab.comments']}" rendered="#{placeBean.place.globalCopy}">
+                        <h:panelGroup layout="block">
+                            <ui:repeat value="#{placeBean.comments}" var="comment">
+                                <h:panelGrid style="width: 100%;">
+                                    <h:panelGroup>
+                                        <h:outputText style="font-weight: bold; font-style: italic; text-decoration: underline;"
+                                                      value="#{comment.user.username}:"/>
+                                        <p:commandButton style="float: right" styleClass="icon-button" icon="ui-icon-closethick"
+                                                         value="" actionListener="#{placeBean.removeComment(comment)}"
+                                                         update="@form" process="@this" rendered="#{comment.user.id == sessionBean.user.id}"/>
+                                    </h:panelGroup>
+                                    <h:outputText value="#{comment.text}"/>
+                                </h:panelGrid>
+
+                                <hr/>
+                            </ui:repeat>
+                        </h:panelGroup>
+
+                        <h:panelGrid columns="2">
+                            <p:outputLabel for="p_comments" value="#{msg['placeDialog.comments']}"/>
+                            <p:inputTextarea id="p_comments" value="#{placeBean.commentText}" style="width: 580px;" required="true"
+                                             disabled="#{sessionBean.user == null}"/>
+
+                            <p:commandButton icon="ui-icon-plusthick" value="#{msg['button.add']}" actionListener="#{placeBean.addComment}"
+                                             update="@form" process="@form"/>
+                            <h:panelGroup/>
+                        </h:panelGrid>
+                    </p:tab>
+                </p:tabView>
+
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update=":p_form:p_messages :treeForm:placesTree :mapForm:map"
+                                 actionListener="#{placeBean.savePlace}"
+                                 oncomplete="handleDialogRequest('placeDlg', args);"
+                                 rendered="#{!placeBean.viewMode}"/>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form :mapForm:map" immediate="true"
+                                 actionListener="#{placeBean.cancel}"
+                                 onclick="PF('placeDlg').hide();"
+                                 rendered="#{!placeBean.viewMode}">
+                    <p:resetInput target="p_form"/>
+                </p:commandButton>
+                <p:commandButton value="#{msg['button.close']}" icon="ui-icon-close" update="@form" immediate="true"
+                                 onclick="PF('placeDlg').hide();"
+                                 rendered="#{placeBean.viewMode}"/>
+            </h:form>
+        </p:dialog>
+        <p:dialog header="#{msg['uploadDialog.title']}" widgetVar="p_uploadDlg" resizable="false" closable="true" width="750" height="300">
+            <h:form>
+                <p:fileUpload fileUploadListener="#{placeBean.uploadPictures}" mode="advanced" multiple="true"
+                              sizeLimit="10000000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" label="#{msg['button.select']}"
+                              uploadLabel="#{msg['button.upload']}" cancelLabel="#{msg['button.cancel']}" update=":#{p:component('photos')}"
+                              invalidFileMessage="#{msg['primefaces.fileUpload.INVALID_TYPE']}"
+                              invalidSizeMessage="#{msg['primefaces.fileUpload.INVALID_FILE_SIZE']}"
+                              fileLimitMessage="#{msg['primefaces.fileUpload.INVALID_FILE_NUMBER']}"
+                              oncomplete="PF('p_uploadDlg').hide();"/>
+            </h:form>
+        </p:dialog>
+        <!-- >>> -->
+
+        <p:dialog id="cd_dialog" header="#{confirmBean.title}" widgetVar="confirmDlg" resizable="false" modal="false" closable="false" width="600">
+            <h:form>
+                <h:outputText value="#{confirmBean.message}"/>
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" actionListener="#{confirmBean.confirm}"
+                                 update=":treeForm:placesTree :mapForm:map"
+                                 oncomplete="PF('confirmDlg').hide();">
+                </p:commandButton>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" actionListener="#{confirmBean.cancel}"
+                                 immediate="true"
+                                 oncomplete="PF('confirmDlg').hide();"/>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

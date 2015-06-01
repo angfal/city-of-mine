@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+	<title>City of Mine</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<h:outputStylesheet name="css/main.css"/>
+	<script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+</h:head>
+<h:body>
+    <h:outputText style="display:  none;" value="#{sessionBean.checkUser()}"/>
+    <p:layout fullPage="true">
+        <p:layoutUnit styleClass="header-layout" position="north" size="65" resizable="false">
+            <ui:insert name="header">
+                <ui:include src="/WEB-INF/templates/common/commonHeader.xhtml"/>
+            </ui:insert>
+        </p:layoutUnit>
+
+        <p:layoutUnit styleClass="content-layout" position="center">
+            <ui:insert name="content"/>
+        </p:layoutUnit>
+
+        <p:layoutUnit styleClass="footer-layout" position="south" size="40" resizable="false">
+            <ui:insert name="footer">
+                <ui:include src="/WEB-INF/templates/common/commonFooter.xhtml"/>
+            </ui:insert>
+        </p:layoutUnit>
+    </p:layout>
+
+    <ui:insert name="dialogs">
+        <ui:include src="/WEB-INF/templates/common/commonDialogs.xhtml"/>
+    </ui:insert>
+</h:body>
+</html>

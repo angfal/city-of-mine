@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="content">
+        <script type="text/javascript">
+            function handleNodeClick(event) {
+                if (event.which == 1) {
+                    setTimeout('showHideNode()', 0);
+                }
+            }
+        </script>
+
+        <p:layout>
+            <p:layoutUnit position="west" size="320" header="#{msg['myRoutes.tree.header']}" resizable="true" collapsible="true">
+
+                <h:form id="treeForm">
+
+                    <!-- Root group context menu -->
+                    <p:contextMenu type="ROOT" for="routesTree">
+                        <p:submenu label="#{msg['myRoutes.tree.menu.add']}" icon="ui-icon-plusthick">
+                            <p:menuitem value="#{msg['myRoutes.tree.menu.add.group']}" icon="ui-icon-group-showed"
+                                        update=":g_form"
+                                        actionListener="#{myRoutesBean.createGroup}"
+                                        oncomplete="PF('grpDlg').show();"/>
+                            <p:menuitem value="#{msg['myRoutes.tree.menu.add.route']}" icon="ui-icon-route-showed"
+                                        update=":rt_form"
+                                        actionListener="#{myRoutesBean.createRoute}"
+                                        oncomplete="PF('routeDlg').show();"/>
+                        </p:submenu>
+                    </p:contextMenu>
+
+                    <!-- Group context menu -->
+                    <p:contextMenu for="routesTree" nodeType="LOCAL_GROUP">
+                        <p:submenu label="#{msg['myRoutes.tree.menu.add']}" icon="ui-icon-plusthick">
+                            <p:menuitem value="#{msg['myRoutes.tree.menu.add.group']}" icon="ui-icon-group-showed"
+                                        update=":g_form"
+                                        actionListener="#{myRoutesBean.createGroup}"
+                                        oncomplete="PF('grpDlg').show();"/>
+                            <p:menuitem value="#{msg['myRoutes.tree.menu.add.route']}" icon="ui-icon-route-showed"
+                                        update=":rt_form"
+                                        actionListener="#{myRoutesBean.createRoute}"
+                                        oncomplete="PF('routeDlg').show();"/>
+                        </p:submenu>
+                        <p:menuitem value="#{msg['myRoutes.tree.menu.modify']}" icon="ui-icon-pencil"
+                                    update=":g_form"
+                                    actionListener="#{myRoutesBean.modifyGroup}"
+                                    oncomplete="PF('grpDlg').show();"/>
+                        <p:menuitem value="#{msg['myRoutes.tree.menu.delete']}" icon="ui-icon-closethick"
+                                    update=":cd_dialog"
+                                    actionListener="#{myRoutesBean.deleteGroup}"
+                                    oncomplete="PF('confirmDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- Route context menu -->
+                    <p:contextMenu for="routesTree" nodeType="LOCAL_ROUTE">
+                        <p:menuitem value="#{msg['myRoutes.tree.menu.modify']}" icon="ui-icon-pencil"
+                                    update=":rt_form"
+                                    actionListener="#{myRoutesBean.modifyRoute}"
+                                    oncomplete="PF('routeDlg').show();"/>
+                        <p:menuitem value="#{msg['myRoutes.tree.menu.delete']}" icon="ui-icon-closethick"
+                                    update=":cd_dialog"
+                                    actionListener="#{myRoutesBean.deleteRoute}"
+                                    oncomplete="PF('confirmDlg').show();"/>
+                    </p:contextMenu>
+
+                    <!-- My routes tree -->
+                    <p:tree id="routesTree" value="#{myRoutesBean.rootNode}" var="data"
+                            selection="#{myRoutesBean.selectedNode}" selectionMode="single" onNodeClick="handleNodeClick(event);">
+                        <p:ajax event="expand"/>
+                        <p:ajax event="collapse"/>
+
+                        <p:treeNode>
+                            <h:outputText value="#{data}"/>
+                        </p:treeNode>
+                        <p:treeNode type="ROOT" icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{msg['tree.node.rootGroup']}"/>
+                        </p:treeNode>
+                        <p:treeNode type="LOCAL_GROUP" icon="ui-icon-group-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                        <p:treeNode type="LOCAL_ROUTE" icon="ui-icon-route-#{data.showed ? 'showed' : 'hidden'}">
+                            <h:outputText value="#{data.name}"/>
+                        </p:treeNode>
+                    </p:tree>
+                    <p:remoteCommand name="showHideNode" update=":treeForm:routesTree :mapForm:map"
+                                     actionListener="#{myRoutesBean.showHideNode}" />
+                </h:form>
+            </p:layoutUnit>
+            <p:layoutUnit position="center">
+
+                <!-- My routes map -->
+                <h:form id="mapForm" styleClass="all-content">
+                    <p:gmap id="map" styleClass="all-content" center="#{myRoutesBean.mapCenter}" zoom="#{myRoutesBean.mapZoom}" type="#{myRoutesBean.mapType}"
+                            mapTypeControl="false" model="#{myRoutesBean.mapModel}" streetView="true">
+
+                        <p:ajax event="overlaySelect" listener="#{myRoutesBean.selectMarker}"/>
+                        <p:ajax event="stateChange" listener="#{myRoutesBean.refreshMapData}"/>
+                        <p:ajax event="pointSelect" listener="#{myRoutesBean.selectMapPoint}" disabled="#{!myRoutesBean.selectCoordinatesMode}"
+                                process="map" update="map"/>
+
+                        <p:gmapInfoWindow>
+                            <p:outputPanel style="display: block; margin: auto;">
+                                <p:outputPanel style="text-align: center; font-weight: bold;">
+                                    <h:outputText value="#{myRoutesBean.selectedMarker.title}"/>
+                                </p:outputPanel>
+                                <hr/>
+                                <p:outputPanel>
+                                    <h:outputText value="#{myRoutesBean.selectedMarker.data}" escape="false"/>
+                                </p:outputPanel>
+                            </p:outputPanel>
+                        </p:gmapInfoWindow>
+                    </p:gmap>
+                </h:form>
+            </p:layoutUnit>
+        </p:layout>
+
+        <!-- Group dialogs <<< -->
+        <p:dialog header="#{msg['groupDialog.title']}" widgetVar="grpDlg" resizable="true" closable="false">
+            <h:form id="g_form">
+                <p:growl id="g_messages"/>
+
+                <h:panelGrid columns="2">
+                    <p:outputLabel for="g_name" value="#{msg['groupDialog.name']}"/>
+                    <p:inputText id="g_name" required="true" value="#{groupBean.group.name}"/>
+
+                    <p:outputLabel value="#{msg['groupDialog.icon']}"/>
+                    <h:panelGroup>
+                        <p:graphicImage id="g_icon" styleClass="ui-icon-property" cache="false"
+                                        value="#{groupBean.uiGroup.markerIcon != null ? groupBean.uiGroup.markerIcon.content : '/resources/images/map/place.png'}">
+                            <f:param name="imageId" value="#{groupBean.uiGroup.markerIcon != null ? groupBean.uiGroup.markerIcon.id : null}"/>
+                        </p:graphicImage>
+                        <p:commandButton icon="ui-icon-arrowreturnthick-1-n" onclick="PF('g_uploadDlg').show();"/>
+                        <p:commandButton icon="ui-icon-cancel" actionListener="#{groupBean.clearIcon}" update="g_icon"/>
+                    </h:panelGroup>
+                </h:panelGrid>
+
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update="g_messages :treeForm:routesTree :mapForm:map"
+                                 actionListener="#{groupBean.saveGroup}"
+                                 oncomplete="handleDialogRequest('grpDlg', args);"/>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form" immediate="true"
+                                 actionListener="#{groupBean.cancel}"
+                                 onclick="PF('grpDlg').hide();">
+                    <p:resetInput target="g_form"/>
+                </p:commandButton>
+            </h:form>
+        </p:dialog>
+        <p:dialog header="#{msg['uploadDialog.title']}" widgetVar="g_uploadDlg" resizable="false" closable="true" width="750" height="300">
+            <h:form>
+                <p:fileUpload fileUploadListener="#{groupBean.uploadIcon}" mode="advanced"
+                              fileLimit="1" sizeLimit="10000000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" label="#{msg['button.select']}"
+                              uploadLabel="#{msg['button.upload']}" cancelLabel="#{msg['button.cancel']}" update="@this :g_form:g_icon"
+                              invalidFileMessage="#{msg['primefaces.fileUpload.INVALID_TYPE']}"
+                              invalidSizeMessage="#{msg['primefaces.fileUpload.INVALID_FILE_SIZE']}"
+                              fileLimitMessage="#{msg['primefaces.fileUpload.INVALID_FILE_NUMBER']}"
+                              oncomplete="PF('g_uploadDlg').hide();"/>
+            </h:form>
+        </p:dialog>
+        <!-- >>> -->
+
+        <!-- Routes dialogs <<< -->
+        <p:dialog header="#{msg['routeDialog.title']}" widgetVar="routeDlg" resizable="false" closable="false">
+            <h:form id="rt_form">
+                <p:growl id="rt_messages"/>
+
+                <h:panelGrid columns="2">
+                    <p:outputLabel for="rt_name" value="#{msg['routeDialog.name']}"/>
+                    <p:inputText id="rt_name" required="true" size="40" value="#{routeBean.route.name}"/>
+
+                    <p:outputLabel for="rt_description" value="#{msg['routeDialog.description']}"/>
+                    <p:editor id="rt_description" value="#{routeBean.route.description}"/>
+
+                    <p:outputLabel for="rt_coords" value="#{msg['routeDialog.coordinates']}"/>
+                    <p:outputPanel>
+                        <h:inputHidden id="rt_coords" value="#{routeBean.coordinate}" required="true"
+                                       requiredMessage="#{msg['routeDialog.message.requiredCoordinates']}"/>
+                        <p:inputText id="rt_coords_view" readonly="true" size="40" value="#{routeBean.coordinate}"/>
+                        <p:commandButton value="..." actionListener="#{routeBean.startSelectCoordinates}" immediate="true"
+                                         onclick="PF('routeDlg').hide(); PF('coordsDlg').show();" update="rt_messages :mapForm:map"/>
+                    </p:outputPanel>
+                </h:panelGrid>
+
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update="rt_messages :treeForm:routesTree :mapForm:map"
+                                 actionListener="#{routeBean.saveRoute}"
+                                 oncomplete="handleDialogRequest('routeDlg', args);"/>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update="@form :mapForm:map" immediate="true"
+                                 actionListener="#{routeBean.cancel}"
+                                 onclick="PF('routeDlg').hide();">
+                    <p:resetInput target="rt_form"/>
+                </p:commandButton>
+            </h:form>
+        </p:dialog>
+        <p:dialog header="#{msg['coordinatesDialog.title']}" widgetVar="coordsDlg" position="430,120" resizable="false" closable="false">
+            <h:form>
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" update=":rt_form:rt_coords :rt_form:rt_coords_view :mapForm:map"
+                                 actionListener="#{routeBean.finishSelectCoordinates}"
+                                 oncomplete="PF('coordsDlg').hide(); PF('routeDlg').show();"/>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" update=":rt_form:rt_coords :rt_form:rt_coords_view :mapForm:map" immediate="true"
+                                 actionListener="#{routeBean.cancelSelectCoordinates}"
+                                 onclick="PF('coordsDlg').hide(); PF('routeDlg').show();"/>
+            </h:form>
+        </p:dialog>
+        <!-- >>> -->
+
+        <p:dialog id="cd_dialog" header="#{confirmBean.title}" widgetVar="confirmDlg" resizable="false" modal="false" closable="false" width="600">
+            <h:form>
+                <h:outputText value="#{confirmBean.message}"/>
+                <p:separator/>
+
+                <p:commandButton value="#{msg['button.ok']}" icon="ui-icon-check" actionListener="#{confirmBean.confirm}"
+                                 update=":treeForm:routesTree :mapForm:map"
+                                 oncomplete="PF('confirmDlg').hide();">
+                </p:commandButton>
+                <p:commandButton value="#{msg['button.cancel']}" icon="ui-icon-close" actionListener="#{confirmBean.cancel}"
+                                 immediate="true"
+                                 oncomplete="PF('confirmDlg').hide();"/>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

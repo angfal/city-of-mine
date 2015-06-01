@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <sec:http pattern="/javax.faces.resource/**" security="none"/>
+    <sec:http pattern="/favicon.ico" security="none"/>
+    <sec:http pattern="/resources/**" security="none"/>
+    <sec:http pattern="/images/**" security="none"/>
+
+    <sec:http auto-config="true" use-expressions="true">
+        <sec:intercept-url pattern="/xhtml/home.jsf" access="permitAll"/>
+        <sec:intercept-url pattern="/xhtml/contacts.jsf" access="permitAll"/>
+        <sec:intercept-url pattern="/xhtml/myPlaces.jsf" access="isAuthenticated()"/>
+        <sec:intercept-url pattern="/xhtml/myRoutes.jsf" access="isAuthenticated()"/>
+        <sec:intercept-url pattern="/xhtml/placesModeration.jsf" access="hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')"/>
+        <sec:intercept-url pattern="/**" access="isAuthenticated()"/>
+
+        <sec:form-login login-page="/xhtml/home.jsf"/>
+        <sec:logout logout-success-url="/" logout-url="/logout" />
+    </sec:http>
+
+    <sec:authentication-manager alias="authenticationManager">
+        <sec:authentication-provider user-service-ref="userService">
+            <sec:password-encoder hash="plaintext"/>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+</beans>
